@@ -2,6 +2,7 @@ import { PluginLogger } from 'alspotron/common/plugins';
 import { BaseSourceProvider } from 'alspotron/src/provider/source/base-source-provider';
 import { attach, OsuLyricsServerSource } from './source';
 import { BeatmapDecoder } from 'osu-parsers';
+import { pathToFileURL } from 'node:url';
 
 export class OsuLyricsSourceProvider extends BaseSourceProvider {
   public name: string = "osu!Lyrics";
@@ -62,6 +63,14 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
       const decoder = new BeatmapDecoder();
       try {
         const beatmap = await decoder.decodeFromPath(e.beatmapPath);
+
+        let coverUrl: string;
+        if (beatmap.events.backgroundPath) {
+          coverUrl = pathToFileURL(beatmap.events.backgroundPath).toString();
+        } else {
+          coverUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+        }
+
         const info = {
           id: `${beatmap.metadata.beatmapSetId}`,
           title: beatmap.metadata.titleUnicode,
@@ -70,8 +79,7 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
           ],
           progress: e.audioPlayTime * 1000,
           duration: beatmap.totalLength,
-          // empty image
-          coverUrl: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
+          coverUrl,
         };
 
         if (e.audioPlaySpeed === -100) {

@@ -3,6 +3,7 @@ import { BaseSourceProvider } from 'alspotron/src/provider/source/base-source-pr
 import { attach, OsuLyricsServerSource } from './source';
 import { BeatmapDecoder } from 'osu-parsers';
 import { pathToFileURL } from 'node:url';
+import path from 'node:path';
 
 export class OsuLyricsSourceProvider extends BaseSourceProvider {
   public name: string = "osu!Lyrics";
@@ -66,7 +67,13 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
 
         let coverUrl: string;
         if (beatmap.events.backgroundPath) {
-          coverUrl = pathToFileURL(beatmap.events.backgroundPath).toString();
+          coverUrl = pathToFileURL(
+            path.resolve(
+              e.beatmapPath,
+              '..',
+              beatmap.events.backgroundPath,
+            ),
+          ).toString();
         } else {
           coverUrl = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
         }

@@ -1,6 +1,9 @@
 # Alsptoron osu-lyrics Source Provider Plugin
 Integrate [osu-lyrics](https://github.com/sunghwan2789/osu-lyrics) into Alsptoron source provider
 
+## Showcase
+https://github.com/user-attachments/assets/2cf99843-75f8-4052-84bd-f13e0cbf568a
+
 ## Download
 1. Download `lib.zip` in repository
 2. Manually import `lib.zip` into Alsptoron plugin (Alsptoron plugin import is broken and doesn't work)

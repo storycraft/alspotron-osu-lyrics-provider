@@ -19,30 +19,37 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
   override start(options: Record<string, unknown>): void {
     if (!this.started) {
       this.started = true;
-      const task = setInterval(async () => {
-        if (!this.started) {
-          clearInterval(task);
-          return;
-        }
 
-        if (!this.source) {
-          try {
-            this.source = await attach();
-            if (this.source) {
-              this.setupSource(this.source);
-            } else {
-              this.logger.warn('cannot find osu! process');
-            }
-          } catch (e) {
-            this.logger.error(`failed to inject server err: ${e}`);
-          }
-        }
-      }, 5000);
+      this.runAttachTask();
     }
 
     super.start(options);
   }
-  setupSource(source: OsuLyricsServerSource) {
+
+  private runAttachTask() {
+    const onCloseHandler = () => {
+      task.close();
+    };
+
+    const task = setInterval(async () => {
+      try {
+        this.source = await attach();
+        if (this.source) {
+          task.close();
+          this.off('close', onCloseHandler);
+          this.setupSource(this.source);
+        } else {
+          this.logger.warn('cannot find osu! process');
+        }
+      } catch (e) {
+        this.logger.error(`failed to inject server err: ${e}`);
+      }
+    }, 2500);
+
+    this.once('close', onCloseHandler);
+  }
+
+  private setupSource(source: OsuLyricsServerSource) {
     this.logger.info('attached to osu!');
 
     let beatmapProgressTask: NodeJS.Timeout | null = null;
@@ -57,8 +64,10 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
       });
 
       if (beatmapProgressTask) {
-        clearInterval(beatmapProgressTask);
+        beatmapProgressTask.close();
       }
+
+      this.runAttachTask();
     });
 
     source.event.on('update', async (e) => {
@@ -77,7 +86,7 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
         const beatmap = await decoder.decodeFromPath(e.beatmapPath);
 
         if (beatmapProgressTask) {
-          clearInterval(beatmapProgressTask);
+          beatmapProgressTask.close();
         }
 
         let coverUrl: string;
@@ -118,7 +127,7 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
           const task = setInterval(() => {
             const currentTime = startProgress + (Date.now() - startTime) * (1 + e.audioPlaySpeed / 100);
             if (currentTime > info.duration) {
-              clearInterval(task);
+              task.close();
               beatmapProgressTask = null;
               this.emit('update', {
                 provider: this.name,
@@ -149,6 +158,11 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
   override close() {
     if (this.started) {
       this.started = false;
+    }
+
+    if (this.source) {
+      this.source.close();
+      this.source = null;
     }
 
     super.close();

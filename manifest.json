@@ -1,0 +1,11 @@
+{
+  "id": "plugin-id",
+  "name": "plugin name",
+  "description": "optional plugin description",
+  "author": "author",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "manifestVersion": 1,
+  "css": [],
+  "main": "index.js"
+}

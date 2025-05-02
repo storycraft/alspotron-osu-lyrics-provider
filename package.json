@@ -1,0 +1,31 @@
+{
+  "name": "alspotron-osu-lyrics-provider",
+  "version": "0.1.0",
+  "description": "osu-lyrics source provider for Alsptoron",
+  "main": "index.js",
+  "scripts": {
+    "build": "pnpm build:native && pnpm build:node",
+    "build:node": "node build.mjs",
+    "build:native": "cargo build --release --message-format=json > node_modules\\cargo.log && neon dist -l node_modules\\cargo.log"
+  },
+  "keywords": [],
+  "author": "storycraft <storycraft@pancake.sh>",
+  "license": "MIT",
+  "dependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "@neon-rs/cli": "0.1.82",
+    "@types/node": "^22.15.3",
+    "alspotron": "github:organization/alspotron",
+    "esbuild": "^0.25.3",
+    "esbuild-plugin-tsc": "^0.5.0",
+    "osu-parsers": "^4.1.7",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.7.1",
+  "devDependencies": {
+    "dll-inject": "^0.0.3"
+  },
+  "os": [
+    "win32"
+  ]
+}

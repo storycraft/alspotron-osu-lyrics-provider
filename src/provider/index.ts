@@ -45,11 +45,22 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
   setupSource(source: OsuLyricsServerSource) {
     this.logger.info('attached to osu!');
 
+    let beatmapProgressTask: NodeJS.Timeout | null = null;
+
     source.event.on('closed', () => {
       this.source = null;
+      this.emit('update', {
+        provider: this.name,
+        data: {
+          type: 'idle'
+        },
+      });
+
+      if (beatmapProgressTask) {
+        clearInterval(beatmapProgressTask);
+      }
     });
 
-    let beatmapProgressTask: NodeJS.Timeout | null = null;
     source.event.on('update', async (e) => {
       if (e.beatmapPath === '') {
         this.emit('update', {

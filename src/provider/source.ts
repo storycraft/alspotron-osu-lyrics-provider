@@ -6,6 +6,7 @@ import EventEmitter from 'node:events';
 import { access, copyFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { X_OK } from 'node:constants';
+import { createInterface } from 'node:readline';
 
 export type SourceEventEmitter = EventEmitter<{
   'update': [event: OsuLyricsEvent],
@@ -45,22 +46,31 @@ export async function attach(): Promise<OsuLyricsServerSource | null> {
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   const socket = net.createConnection('\\\\.\\pipe\\osu!Lyrics');
-  socket.on('error', () => {
+  socket.on('close', () => {
     event.emit('closed');
-    socket.destroy();
   });
   socket.setEncoding('utf-16le');
 
   const event: SourceEventEmitter = new EventEmitter();
-  socket.on('data', (data) => {
-    event.emit('update', parseLineEvent(data.toString().trim()));
-  });
+  const rl = createInterface({ input: socket, terminal: false });
+  (async () => {
+    try {
+      for await (const line of rl) {
+        if (!line) {
+          return;
+        }
+    
+        event.emit('update', parseLineEvent(line));
+      }
+    } catch (e) {
+      socket.destroy();
+    }
+  })();
 
   return {
     event,
     close() {
       socket.destroy();
-      event.emit('closed');
     },
   }
 }

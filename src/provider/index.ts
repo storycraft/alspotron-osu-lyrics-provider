@@ -144,6 +144,6 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
   }
 
   public isRunning(): boolean {
-    return this.source != null;
+    return this.started;
   }
 }

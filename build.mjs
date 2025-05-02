@@ -17,7 +17,7 @@ await esbuild.build({
     esbuildPluginTsc({
       force: true,
     }),
-  ]
+  ],
 });
 
 // write manifest.json

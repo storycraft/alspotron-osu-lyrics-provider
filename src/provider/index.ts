@@ -76,6 +76,10 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
       try {
         const beatmap = await decoder.decodeFromPath(e.beatmapPath);
 
+        if (beatmapProgressTask) {
+          clearInterval(beatmapProgressTask);
+        }
+
         let coverUrl: string;
         if (beatmap.events.backgroundPath) {
           coverUrl = pathToFileURL(
@@ -133,10 +137,6 @@ export class OsuLyricsSourceProvider extends BaseSourceProvider {
               },
             });
           }, 20);
-
-          if (beatmapProgressTask) {
-            clearInterval(beatmapProgressTask);
-          }
           beatmapProgressTask = task;
         }
       } catch (err) {

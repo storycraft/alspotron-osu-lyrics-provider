@@ -26,9 +26,9 @@ async function getTmpPathDll(): Promise<string> {
 
   const targetPath = path.join(tmpdir(), 'alspotron-osu-lyrics-server.dll');
   try {
-    await access(targetPath, X_OK)
-  } catch (e) {
     await copyFile(path.resolve(__dirname, serverDLLPath), targetPath);
+  } catch (e) {
+    await access(targetPath, X_OK);
   }
 
   tmpPath = targetPath;
